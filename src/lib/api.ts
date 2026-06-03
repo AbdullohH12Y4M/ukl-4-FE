@@ -1,7 +1,17 @@
 import axios from 'axios';
 
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://sneakerlocal.up.railway.app';
+
+if (!process.env.NEXT_PUBLIC_API_URL) {
+  // eslint-disable-next-line no-console
+  console.error(
+    '[api.ts] NEXT_PUBLIC_API_URL is not set. Falling back to:',
+    apiBaseUrl
+  );
+}
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  baseURL: apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
