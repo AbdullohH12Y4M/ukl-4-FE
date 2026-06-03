@@ -1,0 +1,330 @@
+{
+  "info": {
+    "_postman_id": "3c8b5e7d-6f2e-4e88-a9df-7d9b5b5d3a12",
+    "name": "SneakerLocal API (Backend + NextAuth)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "callbackUrl", "value": "/" }
+  ],
+  "item": [
+    {
+      "name": "Auth (Backend)",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nama Lengkap\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Credentials) -> access_token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  const token = json?.access_token || json?.data?.access_token;",
+                  "  if (token) pm.collectionVariables.set('accessToken', token);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth (NextAuth)",
+      "item": [
+        {
+          "name": "Session (current user)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "session"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sign in (Credentials) - NextAuth",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signin"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"credentials\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"callbackUrl\": \"{{callbackUrl}}\",\n  \"redirect\": false\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sign out - NextAuth",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signout"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callbackUrl\": \"{{callbackUrl}}\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products (Public/Protected)",
+      "item": [
+        {
+          "name": "Get all products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Get product by slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/:slug",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", ":slug"]
+            }
+          }
+        },
+        {
+          "name": "Update product (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Name\",\n  \"description\": \"Updated description\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Update SKU (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/skus/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["skus", ":id"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 125000\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Update Stock (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/inventories/:skuId",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventories", ":skuId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stock\": 25\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Upload Product Image (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/:id/image",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", ":id", "image"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Pilih file gambar di Postman",
+                  "disabled": false
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Checkout (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"skuId\": \"<skuId>\", \"qty\": 2 }\n  ],\n  \"shippingAddress\": {\n    \"address\": \"Jl. Contoh No. 1\",\n    \"city\": \"Bandung\",\n    \"postalCode\": \"40100\"\n  },\n  \"paymentMethod\": \"bank_transfer\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get My Orders (GET)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID (GET)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Upload Payment Proof (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders/:orderId/payment-proof",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", ":orderId", "payment-proof"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Upload bukti pembayaran",
+                  "disabled": false
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status (PATCH) - Admin",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", ":id", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PAID\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

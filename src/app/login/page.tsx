@@ -95,14 +95,14 @@ export default function LoginPage() {
   return (
     <div className="container" style={{ padding: '40px 0' }}>
       <div className={styles.loginGrid}>
-        <div className={styles.introCard}>
+        {/* <div className={styles.introCard}>
           <h1>{isRegister ? 'Daftar Akun Baru' : 'Masuk ke SneakerLocal'}</h1>
           <p>Login cepat dengan email & password, atau gunakan Google untuk akses cepat.</p>
           <button className="btn btn-secondary btn-full" type="button" onClick={() => signIn('google')}>
             Masuk dengan Google
           </button>
           <p className="text-muted">Akun Google akan tersinkron dengan role CUSTOMER secara otomatis.</p>
-        </div>
+        </div> */}
 
         <div className={styles.formCard}>
           <div className={styles.toggleRow}>
