@@ -59,7 +59,7 @@
 }
 .thumbnailActive {
   opacity: 1;
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
 .detailsPanel {
@@ -94,7 +94,7 @@
 }
 
 .price {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .variantSection {
@@ -133,8 +133,8 @@
 
 .colorPillActive,
 .sizePillActive {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-dim);
 }
 
 .actionsRow {

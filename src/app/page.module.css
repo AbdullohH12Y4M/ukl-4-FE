@@ -1,5 +1,5 @@
 .heroPage {
-  padding : 0px , 20px , 0,5rem;
+  padding: 0 20px 0.5rem;
 }
 
 .hero {
@@ -105,7 +105,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .sectionTitle {
@@ -158,11 +158,19 @@
     grid-template-columns: 1fr;
   }
   .productGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
   }
   .sidebarWrapper {
     position: static;
     top: auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .productGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 

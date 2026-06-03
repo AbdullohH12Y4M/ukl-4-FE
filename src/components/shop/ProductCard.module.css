@@ -68,8 +68,8 @@
 }
 .card:hover .overlay { opacity: 1; }
 .overlayText {
-  background: var(--color-primary);
-  color: #110d0c; /* Black text on white */
+  background: var(--color-accent);
+  color: #ffffff;
   font-size: 0.8rem;
   font-weight: 600;
   padding: 6px 16px;
@@ -87,7 +87,7 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-full);
-  background: rgba(10, 10, 15, 0.7);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;

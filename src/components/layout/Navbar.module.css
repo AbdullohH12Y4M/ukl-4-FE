@@ -6,17 +6,17 @@
   right: 0;
   z-index: 1000;
   height: var(--navbar-height);
-  background: rgba(var(--color-bg-rgb, 15, 15, 15), 0.7); /* Menyesuaikan bg utama */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(var(--color-border-rgb, 255, 255, 255), 0.05);
+  background: rgba(253, 250, 246, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
   transition: background var(--transition-base), border var(--transition-base), box-shadow var(--transition-base);
 }
 
 .scrolled {
-  background: rgba(var(--color-surface-rgb, 20, 20, 20), 0.85);
-  border-bottom-color: var(--color-border);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom-color: var(--color-border-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .inner {
@@ -80,8 +80,8 @@
   background: var(--color-surface-2);
 }
 .navLinkActive {
-  color: var(--color-primary);
-  background: var(--color-primary-dim);
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
   font-weight: 600;
 }
 
@@ -110,8 +110,8 @@
   transition: all var(--transition-fast);
 }
 .searchInput:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-dim);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-dim);
 }
 
 .searchClose {
