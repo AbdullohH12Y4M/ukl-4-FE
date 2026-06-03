@@ -1,18 +1,8 @@
-# TODO - Fix Home Page & Shop Store
+- [x] Understand swagger-products and current frontend product fetching
 
-## Step 1
-- Update `src/store/shop.ts`:
-  - Fix variable typos/undefined (`normalized` vs `normalizedProducts`, `rawProducts/rawCategories` vs real variables).
-  - Ensure filtering logic compiles and returns correct `displayProducts`.
-  - Ensure Zustand `set()` uses defined variables.
+- [x] Implement direct fetch in src/app/page.tsx using productsApi (GET /products/all)
 
-## Step 2
-- Update `src/app/page.tsx`:
-  - Replace direct `products` usage with Zustand store state (`products`, `displayProducts`, `fetchProducts`).
-  - Trigger initial `fetchProducts()` on mount.
-  - Render using `displayProducts` (filtered results).
-
-## Step 3 (verification)
-- Run dev/build to ensure no TS/runtime errors.
-- Check homepage renders and filters respond to URL query params.
+- [ ] Normalize response (images + category naming) to match existing filtering + FilterSidebar
+- [ ] Remove/stop using zustand fetchProducts dependency in src/app/page.tsx
+- [ ] Verify filtering works (category/color/size/minPrice/maxPrice/search) after change
 

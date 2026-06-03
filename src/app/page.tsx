@@ -3,22 +3,60 @@
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-
+import { productsApi } from '@/lib/api';
 import FilterSidebar from '@/components/shop/FilterSidebar';
 import ProductCard from '@/components/shop/ProductCard';
 import styles from './page.module.css';
 
-import { useShopStore } from '@/store/shop';
+import { useState } from 'react';
 
 export default function HomePage() {
-  const { products, fetchProducts } = useShopStore((state) => ({
-    products: state.products,
-    fetchProducts: state.fetchProducts,
-  }));
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    let mounted = true;
+
+    async function load() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await productsApi.getAll();
+        const productsFromApi = response.data?.products ?? response.data?.items ?? response.data?.itemsList ?? response.data ?? [];
+        const categoriesFromApi = response.data?.categories ?? [];
+
+        const normalizedProducts = (productsFromApi as any[]).map((product: any) => ({
+          ...product,
+          images: product.imageUrl ? [product.imageUrl] : product.images || ['/placeholder-shoes.png'],
+          category: product.category?.name || product.category || 'Uncategorized',
+        }));
+
+        const categoriesNormalized =
+          Array.isArray(categoriesFromApi) && categoriesFromApi.length
+            ? (categoriesFromApi.map((c: any) => c?.name ?? c?.slug).filter(Boolean) as string[])
+            : (Array.from(new Set(normalizedProducts.map((p: any) => p.category).filter(Boolean))) as string[]);
+
+        const uniqueCategories = Array.from(new Set(categoriesNormalized)) as string[];
+
+        if (!mounted) return;
+        setProducts(normalizedProducts);
+        setCategories(uniqueCategories);
+        setIsLoading(false);
+      } catch (err: any) {
+        if (!mounted) return;
+        setError(err?.message || 'Gagal memuat data produk');
+        setIsLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
 
   const params = useSearchParams();
   const category = params.get('category') ?? '';
@@ -90,12 +128,12 @@ export default function HomePage() {
 
         <div className={styles.shopGrid}>
           <div className={styles.sidebarWrapper}>
-            <FilterSidebar />
+            <FilterSidebar categories={categories} />
           </div>
           <div className={styles.productGrid}>
             {filteredProducts.length ? (
               filteredProducts.map((product: any, index: number) => (
-                <ProductCard key={product.id} product={product} index={index} />
+                <ProductCard key={product.id ?? product.slug ?? index} product={product} index={index} />
               ))
             ) : (
               <div className={styles.emptyState}>

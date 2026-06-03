@@ -3,8 +3,11 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 import { SlidersHorizontal, X } from 'lucide-react';
-import { CATEGORY_LABELS, MALANG_DISTRICTS } from '@/lib/utils';
 import styles from './FilterSidebar.module.css';
+
+interface FilterSidebarProps {
+  categories: string[];
+}
 
 const SHOE_SIZES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45];
 const COLORS = [
@@ -27,7 +30,7 @@ const PRICE_RANGES = [
   { label: 'Di atas Rp1jt', min: 1000000, max: 0 },
 ];
 
-export default function FilterSidebar() {
+export default function FilterSidebar({ categories }: FilterSidebarProps) {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -80,15 +83,19 @@ export default function FilterSidebar() {
           >
             Semua
           </button>
-          {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-            <button
-              key={key}
-              className={`${styles.option} ${activeCategory === key ? styles.optionActive : ''}`}
-              onClick={() => updateParam('category', key)}
-            >
-              {label}
-            </button>
-          ))}
+
+          {(categories ?? []).map((cat) => {
+            const key = String(cat);
+            return (
+              <button
+                key={key}
+                className={`${styles.option} ${activeCategory === key ? styles.optionActive : ''}`}
+                onClick={() => updateParam('category', key)}
+              >
+                {key}
+              </button>
+            );
+          })}
         </div>
       </div>
 

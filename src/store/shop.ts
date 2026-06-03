@@ -31,15 +31,25 @@ export const useShopStore = create<ShopState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await productsApi.getAll();
-      const items = response.data?.items || response.data || [];
 
-      const normalizedProducts = items.map((product: any) => ({
+      // Swagger: /products/all => { products: [...], categories: [...] }
+      const productsFromApi = response.data?.products ?? response.data?.items ?? response.data?.itemsList ?? response.data ?? [];
+      const categoriesFromApi = response.data?.categories ?? [];
+
+      const normalizedProducts = (productsFromApi as any[]).map((product: any) => ({
         ...product,
         images: product.imageUrl ? [product.imageUrl] : product.images || ['/placeholder-shoes.png'],
         category: product.category?.name || product.category || 'Uncategorized',
       }));
 
-      const uniqueCategories = Array.from(new Set(normalizedProducts.map((p: any) => p.category).filter(Boolean))) as string[];
+      const categoriesNormalized =
+        Array.isArray(categoriesFromApi) && categoriesFromApi.length
+          ? (categoriesFromApi
+              .map((c: any) => c?.name ?? c?.slug)
+              .filter(Boolean) as string[])
+          : (Array.from(new Set(normalizedProducts.map((p: any) => p.category).filter(Boolean))) as string[]);
+
+      const uniqueCategories = Array.from(new Set(categoriesNormalized)) as string[];
 
       set({
         products: normalizedProducts,
