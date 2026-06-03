@@ -1,21 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/shop/ProductCard';
 import FilterSidebar from '@/components/shop/FilterSidebar';
 import { useShopStore } from '@/store/shop';
 import styles from './page.module.css';
 
-export default function HomePage() {
+// 1. PINDAHKAN LOGIKA UTAMA KE DALAM KOMPONEN TERPISAH
+function ShopContent() {
   const router = useRouter();
   const params = useSearchParams();
 
-  // Memanggil state global dari toko Zustand
-  const { products, isLoading, error, fetchProducts } = useShopStore();
+  // Memanggil displayProducts dari Zustand store yang aman dari looping
+  const { displayProducts, isLoading, error, fetchProducts } = useShopStore();
 
-  // Menangkap parameter aktif di URL browser
   const category = params.get('category') ?? '';
   const color = params.get('color') ?? '';
   const size = params.get('size') ?? '';
@@ -29,7 +29,7 @@ export default function HomePage() {
     setSearchInput(search);
   }, [search]);
 
-  // Melakukan fetch ulang setiap kali ada parameter filter baru yang diklik di sidebar
+  // Melakukan fetch ulang hanya jika string filter berubah
   useEffect(() => {
     const filters = {
       category,
@@ -41,7 +41,8 @@ export default function HomePage() {
     };
 
     fetchProducts(filters);
-  }, [category, color, size, minPrice, maxPrice, search, fetchProducts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, color, size, minPrice, maxPrice, search]);
 
   return (
     <div className={styles.heroPage}>
@@ -100,7 +101,7 @@ export default function HomePage() {
             <h2 className={styles.sectionTitle}>Temukan sepatu sesuai kantong mahasiswa</h2>
           </div>
           <p className={styles.sectionMeta}>
-            Menampilkan <strong>{isLoading ? '...' : products.length}</strong> produk aktif.
+            Menampilkan <strong>{isLoading ? '...' : displayProducts.length}</strong> produk aktif.
           </p>
         </div>
 
@@ -111,14 +112,14 @@ export default function HomePage() {
           <div className={styles.productGrid}>
             {isLoading ? (
               <div className={styles.emptyState}>
-                <p className="text-muted">Menghubungkan ke server https://sneakerlocal.up.railway.app...</p>
+                <p className="text-muted">Mengambil data dari server...</p>
               </div>
             ) : error ? (
               <div className={styles.emptyState}>
                 <p className="text-danger">{error}</p>
               </div>
-            ) : products.length ? (
-              products.map((product, index) => (
+            ) : displayProducts.length ? (
+              displayProducts.map((product, index) => (
                 <ProductCard key={product.id} product={product} index={index} />
               ))
             ) : (
@@ -130,5 +131,20 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+// 2. WAJIB DIEXPORT MENGGUNAKAN SUSPENSE WRAPPER AGAR NEXT.JS ROOT LAYOUT TIDAK CRASH
+export default function HomePage() {
+  return (
+    <Suspense 
+      fallback={
+        <div style={{ padding: '4rem', textAlign: 'center', color: '#888' }}>
+          <p>Memuat Sistem Toko SneakerLocal...</p>
+        </div>
+      }
+    >
+      <ShopContent />
+    </Suspense>
   );
 }
