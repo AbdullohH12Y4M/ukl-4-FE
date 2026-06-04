@@ -10,6 +10,16 @@ export interface User {
   createdAt: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Product & SKU ──────────────────────────────────────────────────────────
 export type ProductCategory = 'SNEAKERS' | 'CASUAL' | 'FORMAL' | 'SANDAL' | 'BOOTS';
 
@@ -20,11 +30,11 @@ export interface Product {
   description: string;
   basePrice: number;
   discount?: number;
-  category: ProductCategory;
+  category: ProductCategory | string;
   images: string[];
   skus: ProductSKU[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProductSKU {
