@@ -1,14 +1,12 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { productsApi } from '@/lib/api';
 import FilterSidebar from '@/components/shop/FilterSidebar';
 import ProductCard from '@/components/shop/ProductCard';
 import styles from './page.module.css';
-
-import { useState } from 'react';
 
 export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);

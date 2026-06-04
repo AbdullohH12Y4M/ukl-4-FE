@@ -5,65 +5,71 @@ import { useParams, useRouter } from 'next/navigation';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
 
 import { useCartStore } from '@/store/cart';
-import { useShopStore } from '@/store/shop';
+import { productsApi } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
+import type { Product, ProductSKU } from '@/types';
 import styles from './ProductDetail.module.css';
 
 export default function ProductDetailPage() {
-  const { slug } = useParams();
+  const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
-  const products = useShopStore((state) => state.products);
   const addItem = useCartStore((state) => state.addItem);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState('');
-
-  const product = useMemo(
-    () => products.find((item) => item.slug === slug),
-    [products, slug]
-  );
-
-
   const [activeImage, setActiveImage] = useState('');
-  const [isZoomed, setIsZoomed] = useState(false);
 
   useEffect(() => {
-    if (product && product.images && product.images.length > 0) {
-      setActiveImage(product.images[0]);
+    let mounted = true;
+    if (!slug || typeof slug !== 'string') {
+      setLoading(false);
+      return;
     }
-  }, [product]);
 
-  if (!product) {
-    return (
-      <div className="container" style={{ padding: '40px 0' }}>
-        <div style={{ textAlign: 'center' }}>
-          <h1>Produk tidak ditemukan</h1>
-          <p>Produk yang Anda cari tidak tersedia.</p>
-          <button className="btn btn-primary" onClick={() => router.push('/')}>
-            Kembali ke Beranda
-          </button>
-        </div>
-      </div>
-    );
-  }
+    async function load() {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await productsApi.getBySlug(slug);
+        const data = res.data;
+        if (!mounted) return;
+        setProduct(data);
+        setActiveImage((data.images && data.images[0]) || '');
+      } catch (err: any) {
+        if (!mounted) return;
+        setError('Produk tidak ditemukan atau tidak aktif.');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
 
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [slug]);
 
   const availableColors = useMemo(() => {
-    return Array.from(new Set<string>((product.skus || []).filter((sku: any) => sku.stock > 0).map((sku: any) => sku.color as string)));
+    if (!product) return [];
+    return Array.from(new Set<string>((product.skus || []).filter((s: ProductSKU) => s.stock > 0).map((s: ProductSKU) => s.color as string)));
   }, [product]);
 
   const availableSizes = useMemo(() => {
-    if (!selectedColor) return [];
+    if (!product || !selectedColor) return [] as number[];
     return (product.skus || [])
-      .filter((sku: any) => sku.color === selectedColor && sku.stock > 0)
-      .map((sku: any) => sku.size)
-      .sort((a: any, b: any) => a - b);
+      .filter((sku: ProductSKU) => sku.color === selectedColor && sku.stock > 0)
+      .map((sku: ProductSKU) => sku.size)
+      .sort((a: number, b: number) => a - b);
   }, [product, selectedColor]);
 
-  const selectedSku = useMemo(() => {
-    if (!selectedColor || selectedSize === null) return null;
-    return (product.skus || []).find((sku: any) => sku.color === selectedColor && sku.size === selectedSize) ?? null;
+  const selectedSku = useMemo<ProductSKU | null>(() => {
+    if (!product || !selectedColor || selectedSize === null) return null;
+    return (product.skus || []).find((sku: ProductSKU) => sku.color === selectedColor && sku.size === selectedSize) ?? null;
   }, [product, selectedColor, selectedSize]);
 
   const fallbackImage = 'https://placehold.co/600x600/1a1a24/f97316?text=SneakerLocal';
@@ -88,6 +94,7 @@ export default function ProductDetailPage() {
       setStatus('Pilih warna dan ukuran yang tersedia.');
       return;
     }
+    if (!product) return;
     if (selectedSku.stock < quantity) {
       setStatus(`Stok hanya ${selectedSku.stock}.`);
       return;
@@ -108,9 +115,33 @@ export default function ProductDetailPage() {
     setStatus('Berhasil ditambahkan ke keranjang.');
   };
 
-  const currentPrice = product.discount 
-    ? product.basePrice * (1 - product.discount / 100) 
-    : product.basePrice;
+  const currentPrice = product
+    ? product.discount
+      ? product.basePrice * (1 - product.discount / 100)
+      : product.basePrice
+    : 0;
+
+  if (loading) {
+    return (
+      <div className="container" style={{ padding: '40px 0' }}>
+        <p>Memuat detail produk...</p>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="container" style={{ padding: '40px 0' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1>Produk tidak ditemukan</h1>
+          <p>{error || 'Produk yang Anda cari tidak tersedia.'}</p>
+          <button className="btn btn-primary" onClick={() => router.push('/')}>
+            Kembali ke Beranda
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container" style={{ padding: '40px 0' }}>
@@ -122,15 +153,14 @@ export default function ProductDetailPage() {
 
       <div className={styles.productLayout}>
         <div className={styles.imagePanel}>
-          <div 
+          <div
             className={styles.mainImageWrap}
-            onClick={() => setIsZoomed(!isZoomed)}
-            onMouseLeave={() => setIsZoomed(false)}
+            onClick={() => setActiveImage(displayImage)}
           >
-            <img 
-              src={displayImage} 
-              alt={product.name} 
-              className={`${styles.productImage} ${isZoomed ? styles.productImageZoomed : ''}`} 
+            <img
+              src={displayImage}
+              alt={product.name}
+              className={`${styles.productImage}`}
             />
           </div>
           {product.images && product.images.length > 1 && (
@@ -169,8 +199,8 @@ export default function ProductDetailPage() {
               <p className={styles.variantLabel}>Warna</p>
               <div className={styles.colorRow}>
                 {availableColors.length ? (
-                  availableColors.map((color) => {
-                    const sku = (product.skus || []).find((item: any) => item.color === color);
+                  availableColors.map((color: string) => {
+                    const sku = (product.skus || []).find((item: ProductSKU) => item.color === color);
                     return (
                       <button
                         key={color}

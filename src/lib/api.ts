@@ -14,7 +14,9 @@ const api = axios.create({
 // Request interceptor — attach auth token if available
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
+    // Token disimpan sesuai swagger di top-level response: { access_token: string }
     const token = localStorage.getItem('access_token');
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -69,6 +71,17 @@ export const productsApi = {
   },
 };
 
+// Categories
+export const categoriesApi = {
+  getAll: (params?: Record<string, unknown>) =>
+    api.get('/categories', { params }),
+  listAll: () => api.get('/categories/all'),
+  getOne: (id: string) => api.get(`/categories/${id}`),
+  create: (data: any) => api.post('/categories', data),
+  update: (id: string, data: any) => api.patch(`/categories/${id}`, data),
+  remove: (id: string) => api.delete(`/categories/${id}`),
+};
+
 // Orders
 export const ordersApi = {
   checkout: (data: any) => api.post('/checkout', data),
@@ -88,6 +101,9 @@ export const ordersApi = {
   // Admin
   updateStatus: (id: string, status: string) =>
     api.patch(`/orders/${id}/status`, { status }),
+  deleteOrder: (id: string) => api.delete(`/orders/${id}`),
+  downloadReceipt: (id: string) =>
+    api.get(`/orders/${id}/receipt`, { responseType: 'blob' }),
 };
 
 // Auth
@@ -96,4 +112,10 @@ export const authApi = {
   registerCustomer: (data: any) => api.post('/auth/register/customer', data),
   registerAdmin: (data: any) => api.post('/auth/register/admin', data),
   login: (data: any) => api.post('/auth/login', data),
+  getAllUsers: () => api.get('/auth/users'),
+};
+
+// App (health check)
+export const appApi = {
+  getHello: () => api.get('/'),
 };

@@ -14,8 +14,8 @@ import {
   FiShoppingBag
 } from 'react-icons/fi';
 import { useCartStore } from '@/store/cart';
-import { useShopStore } from '@/store/shop';
-import { useState, useEffect } from 'react';
+import { productsApi } from '@/lib/api';
+import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Navbar.module.css';
 
@@ -37,9 +37,9 @@ export default function Navbar() {
   const totalItems = getTotalItems();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const products = useShopStore((state) => state.products);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -51,19 +51,38 @@ export default function Navbar() {
     setMobileOpen(false);
   }, [pathname]);
 
+  const fetchSearch = useCallback(async (query: string) => {
+    const trimmed = query.trim().toLowerCase();
+    if (!trimmed) {
+      setSearchResults([]);
+      return;
+    }
+    setSearching(true);
+    try {
+      const res = await productsApi.getAll();
+      const all = res.data?.products ?? res.data?.items ?? res.data?.itemsList ?? res.data ?? [];
+      const list = Array.isArray(all) ? all : [];
+      const matched = list
+        .filter((p: any) => {
+          const name = String(p.name ?? '').toLowerCase();
+          const desc = String(p.description ?? '').toLowerCase();
+          return name.includes(trimmed) || desc.includes(trimmed);
+        })
+        .slice(0, 5);
+      setSearchResults(matched);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
+      fetchSearch(searchQuery);
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const searchResults = debouncedSearch
-    ? products.filter((p) =>
-        p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        p.description.toLowerCase().includes(debouncedSearch.toLowerCase())
-      ).slice(0, 5)
-    : [];
+  }, [searchQuery, fetchSearch]);
 
   return (
     <header className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
@@ -114,15 +133,15 @@ export default function Navbar() {
                       {searchResults.length > 0 ? (
                         searchResults.map((p) => (
                           <Link key={p.id} href={`/products/${p.slug}`} className={styles.searchItem} onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}>
-                            <img src={p.images[0]} alt={p.name} className={styles.searchItemImage} />
+                            <img src={p.images?.[0]} alt={p.name} className={styles.searchItemImage} />
                             <div>
                               <div className={styles.searchItemName}>{p.name}</div>
-                              <div className={styles.searchItemPrice}>Rp{p.basePrice.toLocaleString('id-ID')}</div>
+                              <div className={styles.searchItemPrice}>{`Rp${Number(p.basePrice ?? 0).toLocaleString('id-ID')}`}</div>
                             </div>
                           </Link>
                         ))
                       ) : (
-                        <div className={styles.searchEmpty}>Tidak ada hasil untuk "{searchQuery}"</div>
+                        <div className={styles.searchEmpty}>{searching ? 'Mencari...' : `Tidak ada hasil untuk "${searchQuery}"`}</div>
                       )}
                     </div>
                   )}
@@ -162,7 +181,6 @@ export default function Navbar() {
                   aria-label="Menu pengguna"
                 >
                   {session.user?.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={session.user?.image} alt={session.user?.name ?? ''} className={styles.avatar} />
                   ) : (
                     <div className={styles.avatarFallback}>
