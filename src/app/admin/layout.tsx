@@ -27,6 +27,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const tabs = [
     { name: 'Pesanan', path: '/admin' },
     { name: 'Produk', path: '/admin/products' },
+    { name: 'Kategori', path: '/admin/categories' },
+    { name: 'Varian SKU', path: '/admin/skus' },
+    { name: 'Inventaris', path: '/admin/inventories' },
+    { name: 'Pengguna', path: '/admin/users' },
   ];
 
   return (

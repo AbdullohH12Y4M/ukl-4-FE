@@ -240,6 +240,37 @@ export default function OrdersPage() {
                   )}
                 </div>
               )}
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={async () => {
+                    try {
+                      await ordersApi.downloadReceipt(order.id);
+                    } catch {
+                      alert('Gagal mengunduh struk.');
+                    }
+                  }}
+                >
+                  Download Struk
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  onClick={async () => {
+                    if (!confirm(`Hapus pesanan #${order.id}?`)) return;
+                    try {
+                      await ordersApi.deleteOrder(order.id);
+                      setOrders((prev) => prev.filter((o) => o.id !== order.id));
+                    } catch {
+                      alert('Gagal menghapus pesanan.');
+                    }
+                  }}
+                >
+                  Hapus Pesanan
+                </button>
+              </div>
             </section>
           ))}
         </div>

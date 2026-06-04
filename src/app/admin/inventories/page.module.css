@@ -1,0 +1,10 @@
+.adminInventoriesGrid {
+  display: grid;
+  gap: 18px;
+}
+
+.inventoryTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}

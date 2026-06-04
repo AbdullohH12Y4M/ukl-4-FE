@@ -16,6 +16,11 @@ export default auth((req) => {
     }
   }
 
+  // Public categories detail
+  if (nextUrl.pathname.startsWith('/categories') && nextUrl.pathname !== '/categories') {
+    return NextResponse.next();
+  }
+
   // Protected user routes — require login
   const protectedRoutes = ['/checkout', '/orders', '/profile'];
   const isProtected = protectedRoutes.some((r) => nextUrl.pathname.startsWith(r));

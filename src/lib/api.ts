@@ -46,15 +46,14 @@ export default api;
 // Products
 export const productsApi = {
   // Existing (backend: /products)
+  // List semua produk (termasuk non-aktif) untuk admin
   getAll: (params?: Record<string, unknown>) =>
-    api.get('/products/all', { params }),
-
-  // Documentation public endpoint (backend: GET /products/all)
-  // Mengambil semua produk aktif dan kategori aktif tanpa filter.
+    api.get('/products', { params }),
   getAllPublic: () => api.get('/products/all'),
-
   getBySlug: (slug: string) =>
     api.get(`/products/${slug}`),
+  getById: (id: string) =>
+    api.get(`/products?id=${id}`),
   // Disesuaikan ke JSON body sesuai spesifikasi backend (termasuk penentuan type 'PRODUCT'/'SKU')
   create: (data: { type: 'PRODUCT' | 'SKU'; categoryId?: string; name?: string; slug?: string; basePrice?: number; color?: string; size?: string; initialStock?: number }) =>
     api.post('/products', data),

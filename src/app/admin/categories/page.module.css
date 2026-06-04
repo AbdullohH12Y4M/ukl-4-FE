@@ -1,0 +1,10 @@
+.adminCategoriesGrid {
+  display: grid;
+  gap: 18px;
+}
+
+.categoryTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}

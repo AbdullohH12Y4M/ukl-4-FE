@@ -1,0 +1,10 @@
+.adminSkusGrid {
+  display: grid;
+  gap: 18px;
+}
+
+.skuTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}

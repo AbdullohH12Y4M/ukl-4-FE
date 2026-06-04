@@ -70,9 +70,9 @@ export interface Cart {
 }
 
 // ─── Order ───────────────────────────────────────────────────────────────────
-export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-export type ShippingType = 'COURIER' | 'PICKUP';
-export type PaymentMethod = 'TRANSFER' | 'MIDTRANS' | 'COD';
+export type OrderStatus = 'PENDING' | 'WAITING_CONFIRMATION' | 'PAID' | 'SHIPPED' | 'CANCELLED';
+export type ShippingType = 'DELIVERY' | 'PICKUP';
+export type PaymentMethod = 'MANUAL_TRANSFER' | 'TRANSFER' | 'MIDTRANS' | 'COD';
 
 export interface ShippingZone {
   id: string;
